@@ -103,7 +103,7 @@ public class Player : MonoBehaviour
         {
             float v = joystickFirst.Vertical;
             float h = joystickFirst.Horizontal;
-            print(SPEED);
+            //print(SPEED);
             playerVector = (new Vector2(h, v) * Time.deltaTime) * SPEED * speedScale;
             transform.Translate(playerVector);
             if(h<0)

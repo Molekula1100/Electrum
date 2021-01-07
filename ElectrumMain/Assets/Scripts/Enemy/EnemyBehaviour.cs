@@ -21,6 +21,7 @@ public class EnemyBehaviour : EnemyGeneral
     protected float timer;
 
     private EnemyGeneral enemyGeneral;
+    private EnemySpecific enemySpecific;
     private AIDestinationSetter destinationSetter;
     private AstarPath astarPath;
     private GameObject particle;
@@ -32,11 +33,6 @@ public class EnemyBehaviour : EnemyGeneral
   
     protected static Healthbar healthbar;
 
-    private void Awake()
-    {
-        EnemySpecific enemySpecific = new EnemySpecific();
-    }
-
     private void Start()
     {
         healthbar = GameObject.Find(HEALTH_BAR).GetComponent<Healthbar>();
@@ -45,6 +41,7 @@ public class EnemyBehaviour : EnemyGeneral
         player = GameObject.Find(Player.uniqName);
 
         enemyGeneral = GetComponent<EnemyGeneral>();
+        enemySpecific = GetComponent<EnemySpecific>();
         aiPath = GetComponent<AIPath>();
         destinationSetter = GetComponent<AIDestinationSetter>();
         myCollider = GetComponent<Collider2D>();
@@ -61,15 +58,16 @@ public class EnemyBehaviour : EnemyGeneral
 
     private void Update()
     {
+        print(FireRate);
         Flipping();
 
         if(enemyGeneral.Health <= 0)
         {
-            Dead();
+            Death();
         }
     }
 
-    private IEnumerator Activator ()   // активирование врага, когда он заметил плеера
+    private IEnumerator Activator ()   // активирование врага, когда он заметил игрока
     {
 		while (isSleeping) {	
 			Vector2 direction = Direction(player.transform.position, transform.position);
@@ -83,6 +81,7 @@ public class EnemyBehaviour : EnemyGeneral
                     isActive = true;
                     animator.SetBool(RUN_ANIM, true);
                     StartCoroutine(DIS_ACTIVATOR);
+                    StartCoroutine(PURSUE_PLAYER);
                 }
             }
 
@@ -101,7 +100,6 @@ public class EnemyBehaviour : EnemyGeneral
                 if(hit.transform.gameObject.name != Player.uniqName && distance > DISACTIVATING_DISTANCE)
                 {
                     ResetValues();
-
                     isSleeping = true;
                     animator.SetBool(IDLE_ANIM, true);
                     StartCoroutine(ACTIVATOR);
@@ -128,9 +126,10 @@ public class EnemyBehaviour : EnemyGeneral
                 if(hit.transform.gameObject.name == Player.uniqName && distance <= AttackDistance || reachedEndOfPath)
                 {
                     ResetValues();
-                    animator.SetBool(ATTACK_ANIM, true);
                     myCollider.enabled = false;
                     IsReadyToAtack = true;
+                    animator.SetBool(ATTACK_ANIM, true);
+                    StartCoroutine(ATTACKING);
                 } 
             }
             yield return null;
@@ -156,23 +155,24 @@ public class EnemyBehaviour : EnemyGeneral
                     AtackAnimations();
                     Atack();
                     AtackWorm();
-                    timer = 0f;
                     Player.playerHealth -= Damage;
                 }
                 else
                 {
-                    timer = 0f;
+                    ResetValues();
                     isActive = true;
-                    IsReadyToAtack = false;
                     aiPath.enabled = true;
                     RunAnimations();
+                    StartCoroutine(PURSUE_PLAYER);
                 }
             }
 		}
     }
 
-    protected bool IsReadyToRetreat(float minDistance)   // отступление
+    protected bool IsReadyToRetreat()   // отступление
     {
+        animator = GetComponent<Animator>();
+        player = GameObject.Find(Player.uniqName);
         if(Vector2.Distance(player.transform.position, transform.position) <= minDistance)
         {
             Vector2 direction = Direction(player.transform.position, transform.position);
@@ -183,12 +183,6 @@ public class EnemyBehaviour : EnemyGeneral
                 return true;
             }
         }
-
-        else if(Vector2.Distance(player.transform.position, transform.position) <= (minDistance * 4))
-        {
-            return false;
-        }
-
         return false;
     }
 
@@ -237,11 +231,11 @@ public class EnemyBehaviour : EnemyGeneral
         animator.SetBool(ATTACK_ANIM, false);
     }
 
-    private void Dead()
+    private void Death()
     {
-        GameObject enemyParticle = Instantiate(particle, transform.position, Quaternion.identity);
+        /*GameObject enemyParticle = Instantiate(particle, transform.position, Quaternion.identity);
         Destroy(enemyParticle, 1f);
-        Destroy(gameObject);
+        Destroy(gameObject);*/
     }
 
     public virtual void Atack()

@@ -8,7 +8,16 @@ public class DistanceAttackNotWalkableEnemy : EnemySpecific
     [SerializeField] public GameObject wormBulletPref, bulletSpawnPoint;
     [SerializeField] private float bulletAddForceSpeed = 600f;  // скорость пули
 
-    void Awake()
+    private void Awake()
+    {
+        RetreatSpeed = retreatSpeed;
+        AttackDistance = attackDistance;
+        FireRate = fireRate;
+        Health = health;
+        Damage = damage;
+    }
+
+    void Start()
     {
         animator = GetComponent<Animator>();
         aiPath = GetComponent<AIPath>();

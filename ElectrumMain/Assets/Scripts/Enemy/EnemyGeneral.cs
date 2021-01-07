@@ -4,7 +4,7 @@ using Pathfinding;
 
 public class EnemyGeneral : MonoBehaviour
 {   
-    protected const float minDistance = 1f;  
+    protected const float minDistance = 1.5f;  
 
     protected float RetreatSpeed{ get; set; } 
     protected float AttackDistance{ get; set; }    
@@ -18,7 +18,7 @@ public class EnemyGeneral : MonoBehaviour
         }
         set
         {
-            if(value <= 0)
+            if(value < 0.1f)
             {
                 fireRate = 0.1f;
             }

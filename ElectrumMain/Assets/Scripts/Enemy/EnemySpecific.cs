@@ -8,13 +8,4 @@ public class EnemySpecific : EnemyBehaviour
     public float fireRate;
     public int health;
     public int damage;
-
-    public EnemySpecific()
-    {
-        RetreatSpeed = retreatSpeed;
-        AttackDistance = attackDistance;
-        FireRate = fireRate;
-        Health = health;
-        Damage = damage;
-    }
 }

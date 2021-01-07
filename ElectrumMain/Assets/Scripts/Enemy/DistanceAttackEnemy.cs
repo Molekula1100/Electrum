@@ -10,6 +10,14 @@ public class DistanceAttackEnemy : EnemySpecific
 
     [SerializeField] private float atackAddForceSpeed = 400f;  // скорость пули
 
+    private void Awake()
+    {
+        RetreatSpeed = retreatSpeed;
+        AttackDistance = attackDistance;
+        FireRate = fireRate;
+        Health = health;
+        Damage = damage;
+    }
     
     void Start()
     {
@@ -24,7 +32,7 @@ public class DistanceAttackEnemy : EnemySpecific
 
      void Update()
     {
-        isReadyToRetreat = IsReadyToRetreat(minDistance);
+        isReadyToRetreat = IsReadyToRetreat();
         if(isReadyToRetreat)
 
         transform.Translate(-Direction(player.transform.position, transform.position) * Time.deltaTime * retreatSpeed);
