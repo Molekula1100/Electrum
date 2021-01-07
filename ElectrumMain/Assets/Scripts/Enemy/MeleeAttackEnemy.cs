@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 
-public class MeleeAttackEnemy : EnemyGeneral
+public class MeleeAttackEnemy : EnemySpecific
 {
 
     private bool isReadyToRetreat;
@@ -17,16 +17,6 @@ public class MeleeAttackEnemy : EnemyGeneral
 
     void Update()
     {
-        if(isActive)        
-        EnemyIsActive(atackDistance, transform.position);
-
-
-
-        if(IsReadyToAtack)      
-        EnemyIsReadyToAtack(atackDistance, transform.position, AttackRate, Damage);
-
-
-        
         isReadyToRetreat = IsReadyToRetreat(minDistance);
         if(isReadyToRetreat)
 

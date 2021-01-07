@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 
-public class DistanceAttackNotWalkableEnemy : EnemyGeneral
+public class DistanceAttackNotWalkableEnemy : EnemySpecific
 {
     [SerializeField] public GameObject wormBulletPref, bulletSpawnPoint;
     [SerializeField] private float bulletAddForceSpeed = 600f;  // скорость пули
-
 
     void Awake()
     {
@@ -19,13 +18,6 @@ public class DistanceAttackNotWalkableEnemy : EnemyGeneral
     void RemoveCol()
     {
         GetComponent<Collider2D>().isTrigger = true;
-    }
-
-    void Update()
-    {
-        //if(isActive)
-
-        EnemyIsReadyToAtack(atackDistance, bulletSpawnPoint.transform.position, AttackRate, Damage);
     }
 
     public override void AtackAnimations()

@@ -147,7 +147,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67e97ab58d3c49b478ba0a9ba5a9c12d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsReadyToAtack: 0
 --- !u!114 &4915286685257069961
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -160,11 +159,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae977de4b4923a849b44d66a3932127d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsReadyToAtack: 0
   retreatSpeed: 3
-  attackRate: 1.5
-  atackDistance: 1.5
-  minDistance: 1
+  attackDistance: 3
+  fireRate: 1
   health: 3
   damage: 1
 --- !u!114 &2862938960974317518

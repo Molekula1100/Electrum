@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Pathfinding;
 
-public class DistanceAttackEnemy : EnemyGeneral
+public class DistanceAttackEnemy : EnemySpecific
 {
 
     [SerializeField] GameObject bulletPref;
@@ -24,14 +24,6 @@ public class DistanceAttackEnemy : EnemyGeneral
 
      void Update()
     {
-        if(isActive)        EnemyIsActive(atackDistance, transform.position);
-
-
-
-        if(IsReadyToAtack)      EnemyIsReadyToAtack(atackDistance, transform.position, AttackRate, Damage);
-
-
-        
         isReadyToRetreat = IsReadyToRetreat(minDistance);
         if(isReadyToRetreat)
 

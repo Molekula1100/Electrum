@@ -1,43 +1,36 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Pathfinding;
 
-public class EnemyGeneral : EnemyBehaviour
+public class EnemyGeneral : MonoBehaviour
 {   
+    protected const float minDistance = 1f;  
 
-    [SerializeField] protected float retreatSpeed; // скорость отступления
+    protected float RetreatSpeed{ get; set; } 
+    protected float AttackDistance{ get; set; }    
 
-    [SerializeField] private float attackRate;
-
-    protected float AttackRate
+    private float fireRate;
+    protected float FireRate
     {
         get
         {
-            return attackRate;
+            return fireRate;
         }
-
         set
         {
             if(value <= 0)
             {
-                attackRate = 0.2f;
+                fireRate = 0.1f;
             }
             else
             {
-                attackRate = value;
+                fireRate = value;
             }
         }
     }
-    
-    [SerializeField] public float atackDistance; 
 
-    [SerializeField] protected float minDistance = 1f;  // минимальная дистанция от плеера, при нарушении которой враг начинает отступать
-
-
-    [SerializeField] private float health;
-
-    public float Health
+    private int health;
+    public int Health
     {
         get
         {
@@ -46,7 +39,7 @@ public class EnemyGeneral : EnemyBehaviour
 
         set 
         {
-            if(value < 0)               // здоровье не может быть отрицательным
+            if(value < 0)                                     
             {
                 health = 0;
             }
@@ -57,12 +50,8 @@ public class EnemyGeneral : EnemyBehaviour
         }
     }
 
-
-
-
-    [SerializeField] private float damage;
-
-    public float Damage
+    private int damage;
+    public int Damage
     {
         get
         {

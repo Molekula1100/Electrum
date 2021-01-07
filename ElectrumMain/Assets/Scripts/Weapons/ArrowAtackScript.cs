@@ -15,7 +15,7 @@ public class ArrowAtackScript : MonoBehaviour
         if(transform.parent.gameObject.tag == "Enemy")
         {
             if(Vector2.Distance(transform.parent.gameObject.transform.position, this.gameObject.transform.position) 
-            > transform.parent.gameObject.GetComponent<DistanceAttackEnemy>().atackDistance)
+            > transform.parent.gameObject.GetComponent<DistanceAttackEnemy>().attackDistance)
             {
                 Destroy(gameObject);
             }
@@ -23,7 +23,7 @@ public class ArrowAtackScript : MonoBehaviour
         else
         {
             if(Vector2.Distance(transform.parent.gameObject.transform.position, transform.position) 
-            > transform.parent.gameObject.GetComponent<DistanceAttackNotWalkableEnemy>().atackDistance)
+            > transform.parent.gameObject.GetComponent<DistanceAttackNotWalkableEnemy>().attackDistance)
             {
                 Destroy(gameObject);
             }
