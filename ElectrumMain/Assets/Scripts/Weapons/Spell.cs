@@ -25,21 +25,15 @@ public class Spell : MonoBehaviour
                 damage = player.GetComponent<Player>().equipedweapon.GetComponent<Sword>().damage;
                 break;
         }
-        if(col.GetComponent<DistanceAttackEnemy>() != null){
-            col.GetComponent<DistanceAttackEnemy>().Health -= damage;
-        }
-        else if(col.GetComponent<MeleeAttackEnemy>() != null){
-            col.GetComponent<MeleeAttackEnemy>().Health -= damage;
-        }
-        else if(col.GetComponent<DistanceAttackNotWalkableEnemy>() != null){
-            col.GetComponent<DistanceAttackNotWalkableEnemy>().Health -= damage;
+        if(col.GetComponent<EnemyBehaviour>() != null){
+            col.GetComponent<EnemyBehaviour>().Health -= damage;
         }
         else if(col.gameObject != player && col.gameObject.name != "ShotPoint" && col.gameObject.transform.parent != null &&
         col.gameObject.transform.parent.gameObject != player && col.gameObject.tag != "enemyBullet" && col.gameObject.tag != "point"
          && col.gameObject.tag != "Staff")//?
          
         {         
-                print(col.gameObject.name);           
+            print(col.gameObject.name);           
             DestroySelf();
         }
         

@@ -128,6 +128,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67e97ab58d3c49b478ba0a9ba5a9c12d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  retreatSpeed: 3
+  attackDistance: 6
+  fireRate: 1
+  health: 4
+  damage: 1
 --- !u!114 &8167334429057730293
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -140,11 +145,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89933879becb7554caac84ae951fd2ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  retreatSpeed: 3
-  attackDistance: 6
-  fireRate: 1
-  health: 3
-  damage: 1
   bulletPref: {fileID: 3042584809476717575, guid: 88ddd2fff748a094da000b3780f09f87,
     type: 3}
   atackAddForceSpeed: 400

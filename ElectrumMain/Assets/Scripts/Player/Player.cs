@@ -29,10 +29,13 @@ public class Player : MonoBehaviour
     public static InventoryManager inventoryManager;
  
     //private HeroClasses heroClass;
+    void Awake()
+    {
+        uniqName = gameObject.name;
+    }
 
     private void Start()
     {
-        uniqName = gameObject.name;
         needChangeSpeedScale = false;
         playerHealth = 5;
         healthbar.Set(playerHealth);
@@ -141,6 +144,11 @@ public class Player : MonoBehaviour
         && GameObject.Find("GameController").GetComponent<GameManager>().allEnemiesKilled)
         {
             Invoke("Teleportation", 0.5f);
+        }
+
+        if(col.gameObject.CompareTag("enemyBullet"))
+        {
+            playerHealth -= col.gameObject.transform.parent.GetComponent<EnemyBehaviour>().Damage;
         }
     }
 

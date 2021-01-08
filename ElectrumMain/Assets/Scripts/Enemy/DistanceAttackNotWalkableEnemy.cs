@@ -1,41 +1,22 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Pathfinding;
+﻿using UnityEngine;
 
-public class DistanceAttackNotWalkableEnemy : EnemySpecific
+public class DistanceAttackNotWalkableEnemy : MonoBehaviour
 {
-    [SerializeField] public GameObject wormBulletPref, bulletSpawnPoint;
-    [SerializeField] private float bulletAddForceSpeed = 600f;  // скорость пули
+    [SerializeField] private float bulletSpeed = 600f; 
 
-    private void Awake()
+    [SerializeField] private GameObject bulletPref, bulletSpawnPoint;
+    private GameObject player;
+    private EnemyBehaviour enemyBehaviour;
+
+    private void Start()
     {
-        RetreatSpeed = retreatSpeed;
-        AttackDistance = attackDistance;
-        FireRate = fireRate;
-        Health = health;
-        Damage = damage;
+        player = GameObject.Find(Player.uniqName);
+        enemyBehaviour = GetComponent<EnemyBehaviour>();
+        enemyBehaviour.Attack += Attack;
+        Invoke("RemoveCollider", 0.5f);
     }
 
-    void Start()
-    {
-        animator = GetComponent<Animator>();
-        aiPath = GetComponent<AIPath>();
-        Invoke("RemoveCol", 05f);
-    }
-
-    void RemoveCol()
-    {
-        GetComponent<Collider2D>().isTrigger = true;
-    }
-
-    public override void AtackAnimations()
-    {
-        animator.SetBool("idle", false);
-        animator.SetBool("Atack", false);
-    }
-
-    void OnCollisionEnter2D(Collision2D col)
+    private void OnCollisionEnter2D(Collision2D col)
     {
         if(col.gameObject.layer == 2)
         {
@@ -43,12 +24,17 @@ public class DistanceAttackNotWalkableEnemy : EnemySpecific
         }
     }
 
-    public override void AtackWorm()
+    private void RemoveCollider()
     {
-        Vector3 direction = Direction(player.transform.position, transform.position);
-        GameObject arrow = Instantiate(wormBulletPref, bulletSpawnPoint.transform.position, Quaternion.identity);
+        GetComponent<Collider2D>().isTrigger = true;
+    }
+
+    public void Attack()
+    {
+        Vector3 direction = EnemyBehaviour.Direction(player.transform.position, transform.position);
+        GameObject arrow = Instantiate(bulletPref, bulletSpawnPoint.transform.position, Quaternion.identity);
         Rigidbody2D rbArrow = arrow.GetComponent<Rigidbody2D>();
         arrow.transform.SetParent(this.gameObject.transform);
-        rbArrow.AddForce(direction * bulletAddForceSpeed);
+        rbArrow.AddForce(direction * bulletSpeed);
     }
 }

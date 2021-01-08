@@ -40,18 +40,8 @@ public class Staff : Weapon
                 Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemiesLayer);
                 for (int i = 0; i < hitEnemies.Length; i++)
                 {
-                    if(hitEnemies[i].tag == "EnemyClose")
-                    {
-                        hitEnemies[i].GetComponent<MeleeAttackEnemy>().Health--;
-                    }
-                    else if(hitEnemies[i].tag == "Enemy")
-                    {
-                        hitEnemies[i].GetComponent<DistanceAttackEnemy>().Health--;
-                    }
-                    else if(hitEnemies[i].tag == "EnemyWorm")
-                    {
-                        hitEnemies[i].GetComponent<DistanceAttackNotWalkableEnemy>().Health--;
-                    }
+                    if(hitEnemies[i].GetComponent<EnemyBehaviour>() != null)
+                    hitEnemies[i].GetComponent<EnemyBehaviour>().Health--;
                 }
             }
         }

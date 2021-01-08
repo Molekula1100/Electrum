@@ -1,27 +1,18 @@
 ﻿using UnityEngine;
-using Pathfinding;
 
-public class DistanceAttackEnemy : EnemySpecific
+public class DistanceAttackEnemy : MonoBehaviour
 {
+    [SerializeField] private float bulletSpeed = 400f;
 
-    [SerializeField] GameObject bulletPref;
-
-    private bool isReadyToRetreat;
-
-    [SerializeField] private float atackAddForceSpeed = 400f;  // скорость пули
-
-    private void Awake()
-    {
-        RetreatSpeed = retreatSpeed;
-        AttackDistance = attackDistance;
-        FireRate = fireRate;
-        Health = health;
-        Damage = damage;
-    }
+    [SerializeField] private GameObject bulletPref;
+    private GameObject player;
+    private EnemyBehaviour enemyBehaviour;
     
-    void Start()
+    private void Start()
     {
-        aiPath = GetComponent<AIPath>();
+        enemyBehaviour = GetComponent<EnemyBehaviour>();
+        player = GameObject.Find(Player.uniqName);
+        enemyBehaviour.Attack += Attack;
 
         foreach(GameObject enemyClose in GameObject.FindGameObjectsWithTag("EnemyClose"))
         {
@@ -29,36 +20,12 @@ public class DistanceAttackEnemy : EnemySpecific
         }
     }
 
-
-     void Update()
+    public void Attack()
     {
-        isReadyToRetreat = IsReadyToRetreat();
-        if(isReadyToRetreat)
-
-        transform.Translate(-Direction(player.transform.position, transform.position) * Time.deltaTime * retreatSpeed);
-    }
-
-    public override void AtackAnimations()
-    {
-        animator.SetBool("idle", false);
-        animator.SetBool("Atack", true);
-        animator.SetBool("Run", false);
-    }
-
-    public override void RunAnimations()
-    {
-        animator.SetBool("idle", false);
-        animator.SetBool("Atack", false);
-        animator.SetBool("Run", true);
-    }
-
-
-    public override void Atack()
-    {
-        Vector3 direction = Direction(player.transform.position, transform.position);
+        Vector3 direction = EnemyBehaviour.Direction(player.transform.position, transform.position);
         GameObject arrow = Instantiate(bulletPref, transform.position, Quaternion.identity);
         arrow.transform.SetParent(this.gameObject.transform);
         Rigidbody2D rbArrow = arrow.GetComponent<Rigidbody2D>();
-        rbArrow.AddForce(direction * atackAddForceSpeed);
+        rbArrow.AddForce(direction * bulletSpeed);
     }
 }

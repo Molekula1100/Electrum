@@ -1,15 +1,29 @@
 ﻿using System.Collections;
 using UnityEngine;
-using Pathfinding;
 
 public class EnemyGeneral : MonoBehaviour
 {   
     protected const float minDistance = 1.5f;  
 
-    protected float RetreatSpeed{ get; set; } 
-    protected float AttackDistance{ get; set; }    
+    [SerializeField] private float retreatSpeed;
+    public float RetreatSpeed{ 
+        get
+        {
+            return retreatSpeed;
+        }
+        set{}
+    }  
 
-    private float fireRate;
+    [SerializeField] private float attackDistance;
+    public float AttackDistance{ 
+        get
+        {
+            return attackDistance;
+        }
+        set{}
+    }    
+
+    [SerializeField] private float fireRate;
     protected float FireRate
     {
         get
@@ -29,7 +43,7 @@ public class EnemyGeneral : MonoBehaviour
         }
     }
 
-    private int health;
+    [SerializeField] private int health;
     public int Health
     {
         get
@@ -50,7 +64,7 @@ public class EnemyGeneral : MonoBehaviour
         }
     }
 
-    private int damage;
+    [SerializeField] private int damage;
     public int Damage
     {
         get
@@ -60,7 +74,7 @@ public class EnemyGeneral : MonoBehaviour
 
         set 
         {
-            if(value <= 0)              // урон не может быть нулевым или отрицательным
+            if(value <= 0)          
             {
                 damage = 1;
             }

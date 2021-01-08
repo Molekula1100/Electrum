@@ -4,7 +4,7 @@ using Pathfinding;
 
 public class EnemyBehaviour : EnemyGeneral
 {
-    private const string PATHFINDING_CONTROLLER = "PathfindingController", HEALTH_BAR = "healthbar", DEATH_PARTICLE = "DeathParticle";
+    private const string PATHFINDING_CONTROLLER = "PathfindingController", HEALTH_BAR = "healthbar", DEATH_PARTICLE = "EnemyDeathParticle";
     private const string IDLE_ANIM = "idle", RUN_ANIM = "Run",  ATTACK_ANIM = "Attack";
     private const string ACTIVATOR = "Activator", DIS_ACTIVATOR = "DisActivator", PURSUE_PLAYER = "PursuePlayer", ATTACKING = "Attacking";
 
@@ -13,25 +13,26 @@ public class EnemyBehaviour : EnemyGeneral
 
     private bool facingRight = true;
     private bool isSleeping = true;
-    private float flipDifference;
 
-    protected bool reachedEndOfPath = false;      
-    protected bool isActive;
-    protected bool IsReadyToAtack;
-    protected float timer;
+    private bool reachedEndOfPath = false;      
+    private bool isActive;
+    private bool isReadyToAtack;
+    private float attackTimer;
 
     private EnemyGeneral enemyGeneral;
-    private EnemySpecific enemySpecific;
     private AIDestinationSetter destinationSetter;
     private AstarPath astarPath;
     private GameObject particle;
 
-    protected AIPath aiPath;     
-    protected GameObject player;  
-    protected Collider2D myCollider;
-    protected Animator animator;
+    private AIPath aiPath;     
+    private GameObject player;  
+    private Collider2D myCollider;
+    private Animator animator;
   
     protected static Healthbar healthbar;
+
+    public delegate void AttackManager();
+    public event AttackManager Attack;        
 
     private void Start()
     {
@@ -41,14 +42,13 @@ public class EnemyBehaviour : EnemyGeneral
         player = GameObject.Find(Player.uniqName);
 
         enemyGeneral = GetComponent<EnemyGeneral>();
-        enemySpecific = GetComponent<EnemySpecific>();
         aiPath = GetComponent<AIPath>();
         destinationSetter = GetComponent<AIDestinationSetter>();
         myCollider = GetComponent<Collider2D>();
         animator = GetComponent<Animator>();
 
         GameManager.enemiesOnScene.Add(this.gameObject);
-        destinationSetter.target = player.transform;
+        destinationSetter.target = GameObject.Find(Player.uniqName).transform;
         aiPath.enabled = false;
         animator.SetBool(IDLE_ANIM, true);
 
@@ -58,16 +58,16 @@ public class EnemyBehaviour : EnemyGeneral
 
     private void Update()
     {
-        print(FireRate);
         Flipping();
+        CheckToRetreat();
 
-        if(enemyGeneral.Health <= 0)
+        if(Health <= 0)
         {
             Death();
         }
     }
 
-    private IEnumerator Activator ()   // активирование врага, когда он заметил игрока
+    private IEnumerator Activator ()   
     {
 		while (isSleeping) {	
 			Vector2 direction = Direction(player.transform.position, transform.position);
@@ -114,65 +114,66 @@ public class EnemyBehaviour : EnemyGeneral
     {
         while (isActive) 
         {	
-            Vector2 pos = Vector2.one;
-			reachedEndOfPath = aiPath.reachedDestination;
             myCollider.enabled = true;
             aiPath.enabled = true;
-            Vector2 direction = Direction(player.transform.position, pos);
+
+            reachedEndOfPath = aiPath.reachedDestination;
+            Vector2 direction = Direction(player.transform.position, transform.position);
             RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, AttackDistance);
-            float distance  = Vector2.Distance(player.transform.position, pos);
+            float distance  = Vector2.Distance(player.transform.position, transform.position);
             if(hit.collider != null)
             {
                 if(hit.transform.gameObject.name == Player.uniqName && distance <= AttackDistance || reachedEndOfPath)
                 {
                     ResetValues();
                     myCollider.enabled = false;
-                    IsReadyToAtack = true;
+                    isReadyToAtack = true;
                     animator.SetBool(ATTACK_ANIM, true);
                     StartCoroutine(ATTACKING);
-                } 
+                }
             }
+
             yield return null;
 		}
     }
 
     IEnumerator Attacking()
     {
-        while (IsReadyToAtack) 
+        while (isReadyToAtack) 
         {	
-            yield return new WaitForSeconds(1f / FireRate);
+            attackTimer += Time.deltaTime;
 
-            Vector2 pos = Vector2.one;
-			reachedEndOfPath = aiPath.reachedDestination;
-            player = GameObject.FindGameObjectWithTag(Player.uniqName);
-            Vector2 direction = Direction(player.transform.position, pos);
+            reachedEndOfPath = aiPath.reachedDestination;
+            Vector2 direction = Direction(player.transform.position, transform.position);
             RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, AttackDistance);
-            float distance  = Vector2.Distance(player.transform.position, pos);
+            float distance  = Vector2.Distance(player.transform.position, transform.position);
             if(hit.collider != null)
             {
                 if(hit.transform.gameObject.name == Player.uniqName && distance <= AttackDistance || reachedEndOfPath)
                 {
-                    AtackAnimations();
-                    Atack();
-                    AtackWorm();
-                    Player.playerHealth -= Damage;
+                    if(attackTimer > (1f / FireRate))
+                    {
+                        Attack?.Invoke();
+                        attackTimer = 0f;
+                    }
                 }
                 else
                 {
                     ResetValues();
-                    isActive = true;
                     aiPath.enabled = true;
-                    RunAnimations();
+                    isActive = true;
+                    animator.SetBool(RUN_ANIM, true);
                     StartCoroutine(PURSUE_PLAYER);
                 }
             }
+
+            yield return null;
 		}
     }
 
-    protected bool IsReadyToRetreat()   // отступление
+    private void CheckToRetreat()  
     {
         animator = GetComponent<Animator>();
-        player = GameObject.Find(Player.uniqName);
         if(Vector2.Distance(player.transform.position, transform.position) <= minDistance)
         {
             Vector2 direction = Direction(player.transform.position, transform.position);
@@ -180,32 +181,26 @@ public class EnemyBehaviour : EnemyGeneral
             if(hit.collider == null)
             {
                 animator.SetBool(IDLE_ANIM, false);
-                return true;
+                Retreat();
             }
         }
-        return false;
     }
 
-    public virtual void AtackAnimations()
+    void Retreat()
     {
-       
-    }
-
-    public virtual void RunAnimations()
-    {
-        
+        transform.Translate(-Direction(player.transform.position, transform.position)
+         * Time.deltaTime * RetreatSpeed);
     }
 
     private void Flipping()
     {
-        if(isActive)
+        if(!isSleeping)
         {
-            flipDifference = player.transform.position.x - transform.position.x;
-            if (flipDifference < 0 && !facingRight) 
+            if (player.transform.position.x > transform.position.x && facingRight) 
             {
 			    Flip();
 		    } 
-            else if (flipDifference > 0 && facingRight) 
+            if (player.transform.position.x < transform.position.x && !facingRight) 
             {
 			    Flip();
 		    }
@@ -222,10 +217,12 @@ public class EnemyBehaviour : EnemyGeneral
 
     private void ResetValues()
     {
+        attackTimer = 0;
         isActive = false;
         isSleeping = false;
+        isReadyToAtack = false;
         aiPath.enabled = false;
-        IsReadyToAtack = false;
+        
         animator.SetBool(IDLE_ANIM, false);
         animator.SetBool(RUN_ANIM, false);
         animator.SetBool(ATTACK_ANIM, false);
@@ -233,22 +230,12 @@ public class EnemyBehaviour : EnemyGeneral
 
     private void Death()
     {
-        /*GameObject enemyParticle = Instantiate(particle, transform.position, Quaternion.identity);
+        GameObject enemyParticle = Instantiate(particle, transform.position, Quaternion.identity);
         Destroy(enemyParticle, 1f);
-        Destroy(gameObject);*/
+        Destroy(gameObject);
     }
 
-    public virtual void Atack()
-    {   
-       
-    }   
-
-    public virtual void AtackWorm()
-    {
-        
-    }
-
-    public Vector2 Direction(Vector2 target, Vector2 startPos) 
+    public static Vector2 Direction(Vector2 target, Vector2 startPos) 
     {
         Vector2 difference = target - startPos;
         Vector2 direction = difference / difference.magnitude;
