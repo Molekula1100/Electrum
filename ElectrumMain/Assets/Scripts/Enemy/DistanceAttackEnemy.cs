@@ -22,7 +22,7 @@ public class DistanceAttackEnemy : MonoBehaviour
 
     public void Attack()
     {
-        Vector3 direction = EnemyBehaviour.Direction(player.transform.position, transform.position);
+        Vector3 direction = enemyBehaviour.DirectionToPlayer();
         GameObject arrow = Instantiate(bulletPref, transform.position, Quaternion.identity);
         arrow.transform.SetParent(this.gameObject.transform);
         Rigidbody2D rbArrow = arrow.GetComponent<Rigidbody2D>();

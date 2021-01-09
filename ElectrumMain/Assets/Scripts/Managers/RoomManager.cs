@@ -4,13 +4,15 @@ using UnityEngine;
 public class RoomManager : MonoBehaviour
 {
     private const int ENEMY_TYPE_COUNT = 3, DECOR_TYPE_COUNT = 5;
-    private const string INVOKE_METHOD_NAME = "SpawnObj", DECOR_TAG = "decoration";
+    private const float FLOOR_SCALE = 8f;
+    private const string INVOKE_METHOD_NAME = "SpawnAll", DECOR_TAG = "decoration", GAME_CONTROLLER = "GameController";
 
     private float startX;
     private float startY;
-    private float floorScale;
 
-    [SerializeField] private GameObject spawnPref;
+    private GameManager gameManager;
+
+    [SerializeField] private GameObject spawnPointPref;
     [SerializeField] private GameObject portal;
 
     [SerializeField] private GameObject[] decorations = new GameObject[DECOR_TYPE_COUNT];
@@ -19,11 +21,13 @@ public class RoomManager : MonoBehaviour
 
     private void Start()
     {   
-        Generation(spawnPointsOnScene, spawnPref);
+        gameManager = GameObject.Find(GAME_CONTROLLER).GetComponent<GameManager>();
+
+        GenerationSpawnPoints(spawnPointsOnScene, spawnPointPref);
         Invoke(INVOKE_METHOD_NAME, 1.2f);
     }
 
-    private void SpawnObj() 
+    private void SpawnAll() 
     {
         for(int i = 0; i < spawnPointsOnScene.Count; i++)
         {
@@ -33,60 +37,54 @@ public class RoomManager : MonoBehaviour
             }
         }
 
-		Spawn(decorations); // спавним декорации
+		SpawnObjects(decorations);
 
-        Spawn(enemies);  // спавним врагов
-	}
-    
+        SpawnObjects(enemies); 
+	} 
 
-    public static Vector2 RandomPoint(Bounds bounds)
+    private void GenerationSpawnPoints(List<GameObject> spawnPointsOnScene, GameObject spawnPointPref)
     {
-        return new Vector2(Random.Range(bounds.min.x, bounds.max.x), Random.Range(bounds.min.y, bounds.max.y));
-    }    
-
-    private void Generation(List<GameObject> spawnPointsOnScene, GameObject spawnPref)
-    {
-        floorScale = 8f;
-        startX = transform.position.x - floorScale;
-        startY = transform.position.y - floorScale;
-        float maxX = transform.position.x + 16f; //в константу 16
-        float maxY = transform.position.y + 16f; //в константу 16
+        startX = transform.position.x - FLOOR_SCALE;
+        startY = transform.position.y - FLOOR_SCALE;
+        float maxX = transform.position.x + (2 * FLOOR_SCALE); 
+        float maxY = transform.position.y + (2 * FLOOR_SCALE); 
 
         for (int x = (int)startX; x < (int)maxX; x++)
         {
             for(int y = (int)startY; y < (int)maxY; y++)
             {
-                GameObject generateObject = Instantiate(spawnPref, new Vector2((float)x, (float)y), Quaternion.identity);
-                generateObject.transform.SetParent(gameObject.transform);
-                generateObject.AddComponent<SpawnPointBehavior>();
-                spawnPointsOnScene.Add(generateObject);
+                GameObject generatedSpawnPoint = Instantiate(spawnPointPref, new Vector2((float)x, (float)y), Quaternion.identity);
+                generatedSpawnPoint.transform.SetParent(gameObject.transform);
+                generatedSpawnPoint.AddComponent<SpawnPointBehavior>();
+                spawnPointsOnScene.Add(generatedSpawnPoint);
             }
         }
     }
 
-    private void Spawn(GameObject[] spawnObjects)
+    private void SpawnObjects(GameObject[] spawnObjects)
     {
-        int maxFirst = 0;
+        int spawnChance = 0;
         float posZ = 0f;
         switch (spawnObjects.Length)
         {
             case ENEMY_TYPE_COUNT:
-                maxFirst = 28; // в константу
+                spawnChance = ((int)(100f / gameManager.decorSpawnChance)); 
                 posZ = 0f;
                 break;
             case DECOR_TYPE_COUNT:
-                maxFirst = 24;
+                spawnChance = ((int)(100f / gameManager.enemySpawnChance));
                 posZ = 20f;
                 break;
         }
+
         for (int i = 0; i < spawnPointsOnScene.Count; i++)
         {
-            int rnd = Random.Range(1, maxFirst);
+            int spawnChanceNum = Random.Range(1, spawnChance);
 
-            if(rnd == 1 && spawnPointsOnScene[i] != null)
+            if(spawnChanceNum == 1 && spawnPointsOnScene[i] != null)
             {
-                int rndObj = Random.Range(0, spawnObjects.Length);
-                GameObject instantiated = Instantiate(spawnObjects[rndObj], new Vector3(spawnPointsOnScene[i].transform.position.x, 
+                int randomSpawnObj = Random.Range(0, spawnObjects.Length);
+                GameObject instantiated = Instantiate(spawnObjects[randomSpawnObj], new Vector3(spawnPointsOnScene[i].transform.position.x, 
                 spawnPointsOnScene[i].transform.position.y, posZ), Quaternion.identity);
 
                 if(instantiated.tag == DECOR_TAG)
@@ -97,4 +95,3 @@ public class RoomManager : MonoBehaviour
         }
     }
 }
-

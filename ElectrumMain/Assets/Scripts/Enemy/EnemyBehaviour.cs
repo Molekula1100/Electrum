@@ -6,7 +6,7 @@ public class EnemyBehaviour : EnemyGeneral
 {
     private const string PATHFINDING_CONTROLLER = "PathfindingController", HEALTH_BAR = "healthbar", DEATH_PARTICLE = "EnemyDeathParticle";
     private const string IDLE_ANIM = "idle", RUN_ANIM = "Run",  ATTACK_ANIM = "Attack";
-    private const string ACTIVATOR = "Activator", DIS_ACTIVATOR = "DisActivator", PURSUE_PLAYER = "PursuePlayer", ATTACKING = "Attacking";
+    private const string ACTIVATING = "Activating", DIS_ACTIVATING = "DisActivating", CHASING_PLAYER = "ChasingPlayer", ATTACKING = "Attacking";
 
     private const float ACTIVATING_DISTANCE = 10f;
     private const float DISACTIVATING_DISTANCE = 30f;
@@ -53,35 +53,32 @@ public class EnemyBehaviour : EnemyGeneral
         animator.SetBool(IDLE_ANIM, true);
 
         Physics2D.IgnoreCollision(player.GetComponent<Collider2D>(), myCollider);
-        StartCoroutine(ACTIVATOR);
+        StartCoroutine(ACTIVATING);
     }
 
     private void Update()
     {
         Flipping();
+
         CheckToRetreat();
 
-        if(Health <= 0)
-        {
-            Death();
-        }
+        HealthCheck();
     }
 
-    private IEnumerator Activator ()   
+    private IEnumerator Activating()   
     {
 		while (isSleeping) {	
-			Vector2 direction = Direction(player.transform.position, transform.position);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, ACTIVATING_DISTANCE);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, DirectionToPlayer(), ACTIVATING_DISTANCE);
             if(hit.collider != null)
             {
-                if(hit.transform.gameObject.name == Player.uniqName)
+                if(hit.collider.name == Player.uniqName)
                 {
                     ResetValues();
 
                     isActive = true;
                     animator.SetBool(RUN_ANIM, true);
-                    StartCoroutine(DIS_ACTIVATOR);
-                    StartCoroutine(PURSUE_PLAYER);
+                    StartCoroutine(DIS_ACTIVATING);
+                    StartCoroutine(CHASING_PLAYER);
                 }
             }
 
@@ -89,20 +86,18 @@ public class EnemyBehaviour : EnemyGeneral
 		}
 	}
 
-    private IEnumerator DisActivator()
+    private IEnumerator DisActivating()
     {
         while (!isSleeping) {	
-			float distance = Vector2.Distance(player.transform.position, transform.position);
-            Vector2 direction = Direction(player.transform.position, transform.position);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, DirectionToPlayer());
             if(hit.collider != null)
             {
-                if(hit.transform.gameObject.name != Player.uniqName && distance > DISACTIVATING_DISTANCE)
+                if(hit.collider.name != Player.uniqName && DistanceToPlayer() > DISACTIVATING_DISTANCE)
                 {
                     ResetValues();
                     isSleeping = true;
                     animator.SetBool(IDLE_ANIM, true);
-                    StartCoroutine(ACTIVATOR);
+                    StartCoroutine(ACTIVATING);
                 }
             }
 
@@ -110,20 +105,18 @@ public class EnemyBehaviour : EnemyGeneral
 		}
     }
 
-    IEnumerator PursuePlayer()
+    IEnumerator ChasingPlayer()
     {
         while (isActive) 
         {	
             myCollider.enabled = true;
             aiPath.enabled = true;
-
             reachedEndOfPath = aiPath.reachedDestination;
-            Vector2 direction = Direction(player.transform.position, transform.position);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, AttackDistance);
-            float distance  = Vector2.Distance(player.transform.position, transform.position);
+
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, DirectionToPlayer());
             if(hit.collider != null)
             {
-                if(hit.transform.gameObject.name == Player.uniqName && distance <= AttackDistance || reachedEndOfPath)
+                if(hit.collider.name == Player.uniqName && DistanceToPlayer() <= AttackDistance || reachedEndOfPath)
                 {
                     ResetValues();
                     myCollider.enabled = false;
@@ -142,14 +135,12 @@ public class EnemyBehaviour : EnemyGeneral
         while (isReadyToAtack) 
         {	
             attackTimer += Time.deltaTime;
-
             reachedEndOfPath = aiPath.reachedDestination;
-            Vector2 direction = Direction(player.transform.position, transform.position);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, direction, AttackDistance);
-            float distance  = Vector2.Distance(player.transform.position, transform.position);
+
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, DirectionToPlayer());
             if(hit.collider != null)
             {
-                if(hit.transform.gameObject.name == Player.uniqName && distance <= AttackDistance || reachedEndOfPath)
+                if(hit.collider.name == Player.uniqName && DistanceToPlayer() <= AttackDistance || reachedEndOfPath)
                 {
                     if(attackTimer > (1f / FireRate))
                     {
@@ -163,7 +154,7 @@ public class EnemyBehaviour : EnemyGeneral
                     aiPath.enabled = true;
                     isActive = true;
                     animator.SetBool(RUN_ANIM, true);
-                    StartCoroutine(PURSUE_PLAYER);
+                    StartCoroutine(CHASING_PLAYER);
                 }
             }
 
@@ -176,7 +167,7 @@ public class EnemyBehaviour : EnemyGeneral
         animator = GetComponent<Animator>();
         if(Vector2.Distance(player.transform.position, transform.position) <= minDistance)
         {
-            Vector2 direction = Direction(player.transform.position, transform.position);
+            Vector2 direction = DirectionToPlayer();
             RaycastHit2D hit = Physics2D.Raycast(transform.position, -direction, minDistance);
             if(hit.collider == null)
             {
@@ -188,8 +179,7 @@ public class EnemyBehaviour : EnemyGeneral
 
     void Retreat()
     {
-        transform.Translate(-Direction(player.transform.position, transform.position)
-         * Time.deltaTime * RetreatSpeed);
+        transform.Translate(-DirectionToPlayer() * Time.deltaTime * RetreatSpeed);
     }
 
     private void Flipping()
@@ -228,6 +218,14 @@ public class EnemyBehaviour : EnemyGeneral
         animator.SetBool(ATTACK_ANIM, false);
     }
 
+    private void HealthCheck()
+    {
+        if(Health <= 0)
+        {
+            Death();
+        }
+    }
+
     private void Death()
     {
         GameObject enemyParticle = Instantiate(particle, transform.position, Quaternion.identity);
@@ -235,10 +233,15 @@ public class EnemyBehaviour : EnemyGeneral
         Destroy(gameObject);
     }
 
-    public static Vector2 Direction(Vector2 target, Vector2 startPos) 
+    public Vector2 DirectionToPlayer() 
     {
-        Vector2 difference = target - startPos;
+        Vector2 difference = player.transform.position - transform.position;
         Vector2 direction = difference / difference.magnitude;
         return direction;
+    }
+
+    public float DistanceToPlayer() 
+    {
+        return Vector2.Distance(player.transform.position, transform.position);
     }
 }

@@ -1,123 +1,63 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Pathfinding;
 
 public class GameManager : MonoBehaviour
 {
-    private const float ACTIVE_DISTANCE_ROOM = 25f;
+    private const string SCAN_METHOD = "Scan", PATHFINDING_CONTROLLER = "PathfindingController";
 
-    public float timer;    
-    public bool allEnemiesKilled;
+    private AstarPath astarPath;
+    private Player player;
 
-    public static bool readyToSpawn;
+    public bool allEnemiesKilled; 
+
+    // counts in percents
+    [Range(0, 100)] public float enemySpawnChance = 4f; 
+    [Range(0, 100)] public float decorSpawnChance = 4f;
 
     [SerializeField] private GameObject portalPref;
-    [SerializeField] private GameObject startRoom;
-    private GameObject player;
-    private AstarPath astarPath;
-    private RoomGenerator roomGenerator;
 
     public List<GameObject> rooms = new List<GameObject>();
 
+    public static bool readyToSpawn;
+
     public static List<GameObject> enemiesOnScene = new List<GameObject>();
 
-    private void Awake()
+    private void Start()
     {
-        roomGenerator = GameObject.Find("StartRoom").GetComponent<RoomGenerator>();
-        player = GameObject.FindGameObjectWithTag("Player");
-        Invoke("Scan", 0.1f);
+        player = GameObject.Find(Player.uniqName).GetComponent<Player>();
+        player.LoadNextLevel += LoadNextLevel;
 
-        Invoke("AddObjects", 0.2f);
+        allEnemiesKilled = false;
+        Invoke(SCAN_METHOD, 0.1f);
     }
 
     private void Scan()
     {
-        astarPath = GameObject.Find("PathfindingController").GetComponent<AstarPath>();
+        astarPath = GameObject.Find(PATHFINDING_CONTROLLER).GetComponent<AstarPath>();
         astarPath.Scan();
     }
 
-
     private void Update()
     {
-        timer += Time.deltaTime;
         CheckEnemies();
-
-        if(readyToSpawn)
-        {
-            DestroyRooms();
-            Invoke("Scan", 0.1f);
-            Invoke("Addbjects", 0.2f);
-        }
     }
 
     private void CheckEnemies()
     {
-        if(timer > 1.5f)
+        for(int i = 0; i < enemiesOnScene.Count - 1; i++)
         {
-            for(int i = 0; i < enemiesOnScene.Count - 1; i++)
-            {
-                allEnemiesKilled = false;
-                if(enemiesOnScene[i] != null) return;
-            }
-
-            allEnemiesKilled = true;
-            timer = 0f;
+            allEnemiesKilled = false;
+            if(enemiesOnScene[i] != null) return;
         }
+        allEnemiesKilled = true;
+
     }
 
-    private void DestroyRooms()
+    public void LoadNextLevel()
     {
-        for(int i = 0; i < RoomGenerator.SpawnedObj.Count - 1; i++)
-        {
-            if(RoomGenerator.SpawnedObj[i] != null)
-            {
-                if(RoomGenerator.SpawnedObj[i]  != GameObject.Find("StartRoom"))
-                {
-                    Destroy(RoomGenerator.SpawnedObj[i]);
-                } 
-            }
-        }
-
-        foreach (GameObject hall in RoomGenerator.SpawnedHall) 
-        { 
-            Destroy(hall); 
-        }
-
-        foreach (GameObject aditional in RoomGenerator.SpawnedAditionalRoom) 
-        {
-            Destroy(aditional);
-        }
-
-        foreach (GameObject decoration in GameObject.FindGameObjectsWithTag("decoration")) 
-        { 
-            Destroy(decoration); 
-        }
-
-        foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("Enemy")) 
-        { 
-            Destroy(enemy); 
-        }
-
-        foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("EnemyClose"))
-        {
-            Destroy(enemy);
-        }
-
-        foreach (GameObject enemy in GameObject.FindGameObjectsWithTag("EnemyWorm")) 
-        { 
-            Destroy(enemy); 
-        }
-
-        Destroy(GameObject.FindGameObjectWithTag("Portal").transform.parent.transform.gameObject);
-
-        Destroy(GameObject.Find("StartRoom"));
-        GameObject start = Instantiate(startRoom, Vector2.zero, Quaternion.identity);
-        start.name = "StartRoom";
-        readyToSpawn = false;
-        allEnemiesKilled = false;
-        rooms.Clear();
-        RoomGenerator.SpawnedObj.Clear();
-        RoomGenerator.SpawnedHall.Clear();
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

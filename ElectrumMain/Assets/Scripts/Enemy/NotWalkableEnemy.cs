@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class DistanceAttackNotWalkableEnemy : MonoBehaviour
+public class NotWalkableEnemy : MonoBehaviour
 {
     [SerializeField] private float bulletSpeed = 600f; 
 
@@ -31,7 +31,7 @@ public class DistanceAttackNotWalkableEnemy : MonoBehaviour
 
     public void Attack()
     {
-        Vector3 direction = EnemyBehaviour.Direction(player.transform.position, transform.position);
+        Vector3 direction = enemyBehaviour.DirectionToPlayer();
         GameObject arrow = Instantiate(bulletPref, bulletSpawnPoint.transform.position, Quaternion.identity);
         Rigidbody2D rbArrow = arrow.GetComponent<Rigidbody2D>();
         arrow.transform.SetParent(this.gameObject.transform);

@@ -994,11 +994,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8c0b2467d08ef54595eed949aa45e50, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timer: 0
   allEnemiesKilled: 0
+  enemySpawnChance: 4.2
+  decorSpawnChance: 4.2
   portalPref: {fileID: 2790686402489391871, guid: d6bc41dec3bdbcc4ba75fe6bde8d315b,
-    type: 3}
-  startRoom: {fileID: 4534441153069995713, guid: 050b472d71bde423aa3c29f6bbd951ec,
     type: 3}
   rooms: []
 --- !u!1 &365821443

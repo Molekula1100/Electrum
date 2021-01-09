@@ -29,6 +29,9 @@ public class Player : MonoBehaviour
     public static InventoryManager inventoryManager;
  
     //private HeroClasses heroClass;
+    public delegate void LevelLoader();
+    public event LevelLoader LoadNextLevel;
+
     void Awake()
     {
         uniqName = gameObject.name;
@@ -143,7 +146,7 @@ public class Player : MonoBehaviour
         if(col.gameObject.CompareTag("Portal")
         && GameObject.Find("GameController").GetComponent<GameManager>().allEnemiesKilled)
         {
-            Invoke("Teleportation", 0.5f);
+            LoadNextLevel?.Invoke();
         }
 
         if(col.gameObject.CompareTag("enemyBullet"))
@@ -338,12 +341,5 @@ public class Player : MonoBehaviour
                 otherCollider.gameObject.SetActive(false);
             }
         }
-    }
-
-    void Teleportation()
-    {
-        RoomGenerator.SpawnedObj.Clear();
-        transform.position = Vector2.zero;
-        GameManager.readyToSpawn = true;
     }
 }
