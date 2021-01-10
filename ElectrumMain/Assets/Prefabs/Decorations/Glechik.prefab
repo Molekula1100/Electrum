@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 316589374111370987}
   - component: {fileID: 6808708646686858956}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Glechik
   m_TagString: decoration
   m_Icon: {fileID: 0}

@@ -143,8 +143,7 @@ public class Player : MonoBehaviour
         otherCollider = col;
         inCol = true;
 
-        if(col.gameObject.CompareTag("Portal")
-        && GameObject.Find("GameController").GetComponent<GameManager>().allEnemiesKilled)
+        if(col.gameObject.CompareTag("Portal") && GameManager.allEnemiesKilled)
         {
             LoadNextLevel?.Invoke();
         }

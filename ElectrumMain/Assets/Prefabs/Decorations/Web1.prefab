@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7995659658240035126}
   - component: {fileID: 1843635531902242900}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: Web1
   m_TagString: decoration
   m_Icon: {fileID: 0}

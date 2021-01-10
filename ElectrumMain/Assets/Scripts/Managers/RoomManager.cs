@@ -3,51 +3,59 @@ using UnityEngine;
 
 public class RoomManager : MonoBehaviour
 {
-    private const int ENEMY_TYPE_COUNT = 3, DECOR_TYPE_COUNT = 5;
-    private const float FLOOR_SCALE = 8f;
-    private const string INVOKE_METHOD_NAME = "SpawnAll", DECOR_TAG = "decoration", GAME_CONTROLLER = "GameController";
+    private const int ENEMY_TYPE_COUNT = 3, DECOR_TYPE_COUNT = 6;
+    private const float FLOOR_SCALE = 16F;
+    private const string SPAWN_METHOD = "SpawnAll", DECOR_TAG = "decoration";
 
     private float startX;
     private float startY;
 
-    private GameManager gameManager;
+    [Header("The chance counts in percents")]
+    [Range(0, 100)] public float enemySpawnChance; 
+    [Range(0, 100)] public float decorSpawnChance;
+
+    private List<GameObject> spawnPointsInRoom = new List<GameObject>();
 
     [SerializeField] private GameObject spawnPointPref;
     [SerializeField] private GameObject portal;
 
     [SerializeField] private GameObject[] decorations = new GameObject[DECOR_TYPE_COUNT];
     [SerializeField] private GameObject[] enemies = new GameObject[ENEMY_TYPE_COUNT];
-    [SerializeField] private List<GameObject> spawnPointsOnScene = new List<GameObject>();
 
     private void Start()
     {   
-        gameManager = GameObject.Find(GAME_CONTROLLER).GetComponent<GameManager>();
-
-        GenerationSpawnPoints(spawnPointsOnScene, spawnPointPref);
-        Invoke(INVOKE_METHOD_NAME, 1.2f);
+        Invoke(SPAWN_METHOD, 1.2f);
     }
 
     private void SpawnAll() 
     {
-        for(int i = 0; i < spawnPointsOnScene.Count; i++)
+        foreach(GameObject room in RoomGenerator.SpawnedObj)
         {
-            if(spawnPointsOnScene[i] == null)
+            if(room != RoomGenerator.SpawnedObj[0])
             {
-               spawnPointsOnScene.Remove(spawnPointsOnScene[i]);
+                GenerationSpawnPoints(spawnPointsInRoom, spawnPointPref, room);
+                for(int i = 0; i < spawnPointsInRoom.Count; i++)
+                {
+                    if(spawnPointsInRoom[i] == null)
+                    {
+                       spawnPointsInRoom.Remove(spawnPointsInRoom[i]);
+                    }
+                }
+
+		        SpawnObjects(decorations, room);
+                SpawnObjects(enemies, room); 
+
+                spawnPointsInRoom.Clear();
             }
         }
-
-		SpawnObjects(decorations);
-
-        SpawnObjects(enemies); 
 	} 
 
-    private void GenerationSpawnPoints(List<GameObject> spawnPointsOnScene, GameObject spawnPointPref)
+    private void GenerationSpawnPoints(List<GameObject> spawnPointsInRoom, GameObject spawnPointPref, GameObject room)
     {
-        startX = transform.position.x - FLOOR_SCALE;
-        startY = transform.position.y - FLOOR_SCALE;
-        float maxX = transform.position.x + (2 * FLOOR_SCALE); 
-        float maxY = transform.position.y + (2 * FLOOR_SCALE); 
+        startX = room.transform.position.x - (FLOOR_SCALE / 2);
+        startY = room.transform.position.y - (FLOOR_SCALE / 2);
+        float maxX = room.transform.position.x + FLOOR_SCALE; 
+        float maxY = room.transform.position.y + FLOOR_SCALE; 
 
         for (int x = (int)startX; x < (int)maxX; x++)
         {
@@ -56,40 +64,40 @@ public class RoomManager : MonoBehaviour
                 GameObject generatedSpawnPoint = Instantiate(spawnPointPref, new Vector2((float)x, (float)y), Quaternion.identity);
                 generatedSpawnPoint.transform.SetParent(gameObject.transform);
                 generatedSpawnPoint.AddComponent<SpawnPointBehavior>();
-                spawnPointsOnScene.Add(generatedSpawnPoint);
+                spawnPointsInRoom.Add(generatedSpawnPoint);
             }
         }
     }
 
-    private void SpawnObjects(GameObject[] spawnObjects)
+    private void SpawnObjects(GameObject[] objectsToSpawn, GameObject room)
     {
         int spawnChance = 0;
         float posZ = 0f;
-        switch (spawnObjects.Length)
+        switch (objectsToSpawn.Length)
         {
             case ENEMY_TYPE_COUNT:
-                spawnChance = ((int)(100f / gameManager.decorSpawnChance)); 
+                spawnChance = ((int)(100f / decorSpawnChance)); 
                 posZ = 0f;
                 break;
             case DECOR_TYPE_COUNT:
-                spawnChance = ((int)(100f / gameManager.enemySpawnChance));
+                spawnChance = ((int)(100f / enemySpawnChance));
                 posZ = 20f;
                 break;
         }
 
-        for (int i = 0; i < spawnPointsOnScene.Count; i++)
+        for (int i = 0; i < spawnPointsInRoom.Count; i++)
         {
             int spawnChanceNum = Random.Range(1, spawnChance);
 
-            if(spawnChanceNum == 1 && spawnPointsOnScene[i] != null)
+            if(spawnChanceNum == 1 && spawnPointsInRoom[i] != null)
             {
-                int randomSpawnObj = Random.Range(0, spawnObjects.Length);
-                GameObject instantiated = Instantiate(spawnObjects[randomSpawnObj], new Vector3(spawnPointsOnScene[i].transform.position.x, 
-                spawnPointsOnScene[i].transform.position.y, posZ), Quaternion.identity);
+                int randomSpawnObj = Random.Range(0, objectsToSpawn.Length);
+                GameObject instantiated = Instantiate(objectsToSpawn[randomSpawnObj], new Vector3(spawnPointsInRoom[i].transform.position.x, 
+                spawnPointsInRoom[i].transform.position.y, posZ), Quaternion.identity);
 
                 if(instantiated.tag == DECOR_TAG)
                 {
-                    instantiated.transform.SetParent(this.gameObject.transform);
+                    instantiated.transform.SetParent(room.transform);
                 }
             }
         }

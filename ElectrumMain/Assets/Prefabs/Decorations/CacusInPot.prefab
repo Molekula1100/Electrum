@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5351683735851911678}
   - component: {fileID: 5177557695636260406}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: CacusInPot
   m_TagString: decoration
   m_Icon: {fileID: 0}

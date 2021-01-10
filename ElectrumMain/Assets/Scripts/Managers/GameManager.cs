@@ -11,17 +11,11 @@ public class GameManager : MonoBehaviour
     private AstarPath astarPath;
     private Player player;
 
-    public bool allEnemiesKilled; 
-
-    // counts in percents
-    [Range(0, 100)] public float enemySpawnChance = 4f; 
-    [Range(0, 100)] public float decorSpawnChance = 4f;
-
     [SerializeField] private GameObject portalPref;
 
     public List<GameObject> rooms = new List<GameObject>();
 
-    public static bool readyToSpawn;
+    public static bool allEnemiesKilled; 
 
     public static List<GameObject> enemiesOnScene = new List<GameObject>();
 
